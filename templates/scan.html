@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Recycle AI App</title>
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDruxxPPJiOskvUtaVrs8snyzDirMSlu6k&libraries=places"></script>
+<style>
+body, html {
+  margin: 0;
+  padding: 0;
+  font-family: 'Roboto', sans-serif;
+  background-color: #f9f9f9;
+}
+
+.wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  min-height: 100vh;
+  padding: 20px;
+  padding-bottom: 70px;
+  box-sizing: border-box;
+}
+
+.webcam-feed-container {
+  width: 100%;
+  max-width: 65%;
+  aspect-ratio: 4 / 5;
+  background: #000;
+  border: 3px solid #131314;
+  border-radius: 24px;
+  margin: 20px auto;
+  position: relative;
+  overflow: hidden;
+}
+
+.webcam-feed-container #video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+#static-image {
+  display: none;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  backdrop-filter: blur(100%);
+}
+
+#loading {
+  display: none;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: white;
+  font-size: 2em;
+}
+
+.buttons-container {
+  position: absolute;
+  bottom: 10px;
+  left: 0;
+  width: 100%;
+  text-align: center;
+}
+
+.icon-button {
+  background: transparent;
+  border: none;
+  color: white;
+  font-size: 24px;
+  margin: 0 10px;
+  cursor: pointer;
+}
+
+.response-container {
+  width: 100%;
+  max-width: 65%;
+  margin: 20px auto;
+  overflow-y: auto;
+  border-radius: 24px;
+  max-height: 300px;
+  padding: 10px;
+  background-color: #fff;
+  color: #131314;
+  box-sizing: border-box;
+}
+
+.response-title {
+  font-size: 1.5em;
+  margin-bottom: 10px;
+}
+
+.navbar {
+  display: flex;
+  justify-content: space-around;
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  background-color: white;
+  box-shadow: 0 -2px 4px rgba(0, 0, 0, 0.1);
+  padding: 12px 0;
+  z-index: 1000;
+}
+
+.nav-item {
+  text-align: center;
+  color: #6B7280;
+  font-size: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.nav-item i {
+  font-size: 20px;
+}
+
+.nav-item.active {
+  color: #10B981;
+}
+
+@media (max-width: 600px) {
+  .wrapper {
+    align-items: stretch;
+  }
+  .webcam-feed-container, .response-container {
+    max-width: 100%;
+  }
+}
+.map-container {
+  width: 100%; /* or match the width of the response container */
+  max-width: 100%; /* Match the response container width if necessary */
+  margin: 20px auto; /* Center it horizontally with some margin on top */
+  background-color: #fff; /* Background color similar to the response container */
+  border-radius: 24px; /* Rounded corners */
+  overflow: hidden; /* Ensures nothing spills out */
+  padding: 10px; /* Some padding around the map */
+  box-sizing: border-box; /* Makes sure padding and border are included in width/height */
+}
+.video-container {
+  width: 100%;
+  max-width: 100%; /* Match the width of other containers for consistency */
+  margin: 20px auto; /* Center the container */
+  padding: 10px;
+  background-color: #fff; /* White background */
+  border-radius: 24px; /* Rounded edges */
+  box-sizing: border-box; /* Border and padding included in width/height */
+  overflow: hidden; /* Hides anything outside the border radius */
+}
+
+</style>
+</head>
+<body>
+    <div class="wrapper">
+        <div class="webcam-feed-container" id="camera-feed">
+            <video id="video" autoplay playsinline></video>
+            <img id="static-image" src="#" alt="Static Capture">
+            <div id="loading"><i class="fas fa-circle-notch fa-spin"></i></div>
+            <div class="buttons-container">
+              <button class="icon-button" id="snap" title="Take Picture"><i class="fas fa-camera"></i></button>
+              <input type="file" id="upload-btn" hidden accept="image/*">
+              <label for="upload-btn" class="icon-button" title="Upload Image"><i class="fas fa-upload"></i></label>
+            </div>
+        </div>
+    
+        <div class="response-container">
+            <div class="response-title">Recycle AI</div>
+            <div id="analysis-result" class="response-text"></div>
+        </div>
+        <div id="map-container" class="map-container"></div> <!-- New container for the map -->
+        <div id="video-container" class="video-container"></div>
+    </div>
+
+    <div class="navbar">
+        <a href="/" class="nav-item">
+            <i class="fas fa-home"></i>
+            <span>Home</span>
+        </a>
+        <a href="/scan" class="nav-item active">
+            <i class="fas fa-camera"></i>
+            <span>Scan</span>
+        </a>
+        <a href="/browse" class="nav-item">
+            <i class="fas fa-th"></i>
+            <span>Browse</span>
+        </a>
+    </div>
+
+    <script>
+console.log("Script loaded and executing");
+const video = document.getElementById('video');
+const snapButton = document.getElementById('snap');
+const canvas = document.createElement('canvas'); 
+const staticImage = document.getElementById('static-image');
+const loadingIndicator = document.getElementById('loading');
+const uploadBtn = document.getElementById('upload-btn');
+const imageInput = document.getElementById('image-input');
+const analysisResult = document.getElementById('analysis-result');
+
+// Define a mapping of materials to their recycling locations
+const materialLocations = {
+    'bottles': [
+        'New Hope Recycling, 415 Three Square Hollow Road, Newburg, PA 17240'
+    ],
+    'cans': [
+    'Cumberland County Landfill Drop-Off Recycling, 620 Newville Road, Newburg, PA 17240',
+    ],
+    'paper': [
+    'Waste Management of Central Pennsylvania Transfer Station Drop-Off Recycling, 4300 Industrial Park Road, Camp Hill, PA 17011',
+    ],
+    'plastic': [
+    'Boyd E. Diller Transfer Station Drop-Off Recycling, 6820 Wertzville Road, Enola, PA 17025'
+    ],
+    'glass': [
+    'New Hope Recycling, 415 Three Square Hollow Road, Newburg, PA 17240'
+    ],
+    'steel': [
+    'Waste Management of Central Pennsylvania Transfer Station Drop-Off Recycling, 4300 Industrial Park Road, Camp Hill, PA 17011',
+    ],
+    'aluminum': [
+    'Waste Management of Central Pennsylvania Transfer Station Drop-Off Recycling, 4300 Industrial Park Road, Camp Hill, PA 17011',
+    ]
+};
+
+// Access webcam
+navigator.mediaDevices.getUserMedia({ video: true })
+  .then(stream => video.srcObject = stream)
+  .catch(console.error);
+
+// Capture image from webcam
+snapButton.addEventListener('click', () => {
+  canvas.width = video.videoWidth;
+  canvas.height = video.videoHeight;
+  canvas.getContext('2d').drawImage(video, 0, 0);
+  staticImage.src = canvas.toDataURL('image/jpeg');
+  video.style.display = 'none';
+  staticImage.style.display = 'block';
+  loadingIndicator.style.display = 'block';
+  getUserLocation();
+});
+
+// Handle image upload (through file input)
+uploadBtn.addEventListener('change', () => {
+  loadImageFromInput(uploadBtn.files[0]);
+});
+
+imageInput.addEventListener('change', () => {
+  loadImageFromInput(imageInput.files[0]);
+});
+
+function loadImageFromInput(file) {
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    staticImage.src = e.target.result;
+    video.style.display = 'none'; 
+    staticImage.style.display = 'block';
+    loadingIndicator.style.display = 'block';
+    getUserLocation();
+  };
+  reader.readAsDataURL(file);
+}
+
+function getUserLocation() {
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(processPosition, showError);
+  } else {
+    analysisResult.innerText = "Geolocation is not supported by this browser.";
+  }
+}
+
+function processPosition(position) {
+  const userLocation = {
+    latitude: position.coords.latitude,
+    longitude: position.coords.longitude
+  };
+  processImage(userLocation);
+}
+
+function showError(error) {
+  switch(error.code) {
+    case error.PERMISSION_DENIED:
+      analysisResult.innerText = "User denied the request for Geolocation.";
+      break;
+    case error.POSITION_UNAVAILABLE:
+      analysisResult.innerText = "Location information is unavailable.";
+      break;
+    case error.TIMEOUT:
+      analysisResult.innerText = "The request to get user location timed out.";
+      break;
+    case error.UNKNOWN_ERROR:
+      analysisResult.innerText = "An unknown error occurred.";
+      break;
+  }
+}
+
+function processImage(userLocation) {
+    const base64Image = staticImage.src.split(',')[1];
+    fetch('/analyze', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ image: base64Image })
+    })
+    .then(response => response.json())
+    .then(data => {
+        loadingIndicator.style.display = 'none';
+        analysisResult.innerHTML = formatBoldAndNewLine(data.result); // Use the new formatting function here
+        checkKeywordsAndDisplayMap(data.result); // Function to check the keywords in output and display map locations
+        displayYouTubeVideos(data.videoIDs); // Function to display YouTube videos from python backend
+    })
+    .catch(error => {
+        console.error("Error processing image:", error);
+        analysisResult.innerText = "Failed to process image.";
+    });
+}
+
+
+
+function checkKeywordsAndDisplayMap(text) {
+    for (const [material, addresses] of Object.entries(materialLocations)) {
+        if (text.toLowerCase().includes(material)) {
+            displayMap(addresses[0]); // Example: Display the first address for simplicity
+            break; // Stop after the first match
+        }
+    }
+}
+
+function displayMap(address) {
+    const mapFrame = document.createElement('iframe');
+    mapFrame.width = '100%'; // Adjust width to 100% of its container
+    mapFrame.height = '250px'; // Set a fixed height or make it responsive as needed
+    mapFrame.style.border = 'none'; // Remove any border for a cleaner look
+    mapFrame.loading = 'lazy';
+    mapFrame.allowFullscreen = true;
+    mapFrame.src = `https://www.google.com/maps/embed/v1/place?key=AIzaSyDruxxPPJiOskvUtaVrs8snyzDirMSlu6k&q=${encodeURIComponent(address)}`;
+    document.getElementById('map-container').innerHTML = ''; // Clear previous maps if any
+    document.getElementById('map-container').appendChild(mapFrame);
+}
+function formatBoldAndNewLine(text) {
+    // Use regular expression to replace **text** with a new line and bold formatting
+    return text.replace(/\*\*(.*?)\*\*/g, '<br><strong>$1</strong><br>');
+}
+function displayYouTubeVideos(videoIDs) {
+    const videoContainer = document.getElementById('video-container');
+    videoContainer.innerHTML = ''; // Clear previous videos
+
+    videoIDs.forEach(id => {
+        const iframe = document.createElement('iframe');
+        iframe.src = `https://www.youtube.com/embed/${id}`;
+        iframe.width = '100%'; // Responsive width
+        iframe.height = '250'; // Fixed height, adjust as necessary
+        iframe.frameBorder = '0';
+        iframe.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture';
+        iframe.allowFullscreen = true;
+        videoContainer.appendChild(iframe);
+    });
+}
+
+    </script>
+</body>
+</html>
