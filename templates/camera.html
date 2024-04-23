@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <title>Camera App</title>
+    <style>
+        /* CSS keyframes and animations for UI elements */
+        @keyframes breathe {
+            0%, 100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+            50% {
+                transform: scale(0.95);
+                opacity: 0.7;
+            }
+        }
+
+        @keyframes sweep {
+            0% {
+                transform: rotate(0deg);
+            }
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        #photoButton {
+            background-color: rgba(255, 255, 255, 0.2);
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            animation: breathe 2s ease-in-out infinite;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            border: 2px solid white;
+            outline: none;
+        }
+
+        #photoButton:before {
+            content: '';
+            position: absolute;
+            width: 80%;
+            height: 80%;
+            background-color: white;
+            border-radius: 50%;
+            opacity: 0.5;
+        }
+
+        #uploadButton {
+            display: none;
+        }
+
+        #loadingAnimation {
+            display: none;
+            position: absolute;
+            top: 40%;
+            left: 40%;
+            transform: translate(-50%, -50%);
+            width: 100px;
+            height: 100px;
+            background-color: transparent;
+            border-radius: 50%;
+            border: 10px solid transparent;
+            border-top-color: rgba(255, 255, 255, 0.8);
+            animation: sweep 2s linear infinite;
+        }
+
+        #loadingAnimation:before, #loadingAnimation:after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+        }
+
+        #loadingAnimation:before {
+            background-color: rgba(0, 255, 0, 0.1);
+            z-index: -1;
+        }
+
+        #loadingAnimation:after {
+            background-color: rgba(0, 255, 0, 0.05);
+            z-index: -1;
+            animation: pulse 2s ease-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                transform: scale(0.95);
+                opacity: 0.5;
+            }
+            50% {
+                transform: scale(1.05);
+                opacity: 1;
+            }
+        }
+
+        #staticImage {
+            display: none;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+    </style>
+</head>
+<body class="bg-green-600">
+    <div class="flex flex-col h-screen">
+        <div class="p-6 bg-green-800 flex justify-between items-center">
+            <i class="fas fa-sync text-white text-2xl" onclick="switchCamera()"></i>
+            <i class="fas fa-bolt text-white text-2xl" onclick="toggleFlash()" style="position: absolute; right: 20px;"></i>
+            <label for="uploadButton">
+                <i class="fas fa-images text-white text-2xl cursor-pointer"></i>
+            </label>
+            <input id="uploadButton" type="file" accept="image/*" onchange="handleImageUpload(event)" />
+        </div>
+        <div class="flex-grow bg-green-200 flex justify-center items-center relative">
+            <video id="video" class="absolute top-0 left-0 w-full h-full object-cover" autoplay></video>
+            <img id="staticImage" src="" class="absolute top-0 left-0 w-full h-full object-cover">
+            <div id="loadingAnimation"></div>
+        </div>
+        <div class="p-6 bg-green-800 flex justify-center items-center">
+            <button id="photoButton" class="overflow-hidden"></button>
+            <canvas id="canvas" class="hidden"></canvas>
+        </div>
+    </div>
+    <script>
+        let currentCamera = 'environment'; // Default to back camera
+        const video = document.getElementById('video');
+        const canvas = document.getElementById('canvas');
+        const photoButton = document.getElementById('photoButton');
+        const uploadButton = document.getElementById('uploadButton');
+        const loadingAnimation = document.getElementById('loadingAnimation');
+        const staticImage = document.getElementById('staticImage');
+        const context = canvas.getContext('2d');
+        let stream = null;
+        let imageCapture = null;
+
+        function getCameraStream() {
+            if (stream) {
+                stream.getTracks().forEach(track => track.stop());
+            }
+            navigator.mediaDevices.getUserMedia({ video: { facingMode: currentCamera } })
+                .then(function(s) {
+                    stream = s;
+                    video.srcObject = stream;
+                    video.play();
+                    const track = stream.getVideoTracks()[0];
+                    imageCapture = new ImageCapture(track);
+                }).catch(function(error) {
+                    console.log("Error accessing camera: ", error);
+                });
+        }
+
+        if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+            getCameraStream();
+        }
+
+        function switchCamera() {
+            currentCamera = (currentCamera === 'user') ? 'environment' : 'user';
+            getCameraStream();
+        }
+
+        function toggleFlash() {
+            if (!imageCapture) {
+                console.log('No image capture support');
+                return;
+            }
+            imageCapture.getPhotoCapabilities().then(function(capabilities) {
+                if (capabilities.fillLightMode.includes('flash')) {
+                    const settings = { fillLightMode: 'flash' };
+                    imageCapture.takePhoto({photoSettings: settings}).then(blob => {
+                        console.log('Flash activated and photo taken');
+                    }).catch(error => console.error('Error taking photo with flash:', error));
+                }
+            });
+        }
+
+        photoButton.addEventListener('click', function() {
+            captureImageAndSend();
+        });
+
+        function captureImageAndSend() {
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            context.drawImage(video, 0, 0, canvas.width, canvas.height);
+            photoButton.style.animation = 'none';
+            const imageData = canvas.toDataURL('image/jpeg');
+            sessionStorage.setItem('capturedImage', imageData); // Store captured image data
+            displayImage(imageData);
+            sendImageToServer(imageData);
+        }
+
+        function handleImageUpload(event) {
+            const file = event.target.files[0];
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const imageData = e.target.result;
+                sessionStorage.setItem('capturedImage', imageData); // Store captured image data
+                displayImage(imageData);
+                sendImageToServer(imageData);
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function sendImageToServer(imageData) {
+            loadingAnimation.style.display = 'block'; // Show the loading animation
+            fetch('/analyze', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ image: imageData.split(',')[1] })  // Send only the base64 part
+            })
+            .then(response => response.json())
+            .then(data => {
+                sessionStorage.setItem('AIResponse', JSON.stringify(data));
+                window.location.href = '/scan';  // Redirect to scan.html
+            })
+            .catch(err => {
+                console.error('Error sending image:', err);
+                loadingAnimation.style.display = 'none';  // Hide the loading animation on error
+            });
+        }
+
+        function displayImage(dataUrl) {
+            staticImage.src = dataUrl;
+            staticImage.style.display = 'block';
+            video.style.display = 'none'; // Turn off the camera
+            if (stream) {
+                stream.getTracks().forEach(track => track.stop()); // Stop the video stream
+            }
+        }
+    </script>
+</body>
+</html>

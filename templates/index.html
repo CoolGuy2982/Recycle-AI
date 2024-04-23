@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Splash Screen</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700&display=swap" rel="stylesheet">
+    <style>
+        .bg-green-950 {
+            /* Define your custom green color here */
+            background-color: #004d40;
+        }
+        .text-green-500 {
+            /* Define the text color here if it's not part of your Tailwind config */
+            color: #81c784;
+        }
+        /* Ensure full height for the page and center content */
+        html, body {
+            height: 100%;
+            margin: 0;
+        }
+        body {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+    </style>
+    <script>
+        document.addEventListener("DOMContentLoaded", function(event) {
+            setTimeout(function() {
+                window.location.href = "/camera"; // Redirect to Flask endpoint after a delay
+            }, 3000); // Delay of 3 seconds
+        });
+    </script>
+</head>
+<body class="bg-green-950">
+    <div class="text-green-500 text-3xl font-bold font-montserrat">Firley</div>
+</body>
+</html>

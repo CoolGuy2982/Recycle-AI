@@ -3,15 +3,35 @@ import os
 import base64
 from dotenv import load_dotenv
 import google.generativeai as genai
-
+#AIzaSyDruxxPPJiOskvUtaVrs8snyzDirMSlu6k GMAPS
 load_dotenv()  # Load your API key
 GOOGLE_API_KEY = os.getenv('GOOGLE_API_KEY')
 
 app = Flask(__name__)
 
+# Separate dictionaries for locations and videos
+material_locations = {
+    'plastic': ['Boyd E. Diller Transfer Station Drop-Off Recycling, 6820 Wertzville Road, Enola, PA 17025'],
+    'glass': ['New Hope Recycling, 415 Three Square Hollow Road, Newburg, PA 17240'],
+    'paper': ['Waste Management of Central Pennsylvania Transfer Station Drop-Off Recycling, 4300 Industrial Park Road, Camp Hill, PA 17011'],
+    'metal': ['Cumberland County Landfill Drop-Off Recycling, 620 Newville Road, Newburg, PA 17240'],
+}
+
+material_videos = {
+    'plastic bottle': ['Tzi_uTNT9_E', '8mVpl34OOHA', '0bl-pfdYaEk'],
+    'plastic': ['j-7grMXIXs0', 'qTrsFgGBwcs', 'zz4P39WeTV8'],
+    'glass jar': ['8f2l2rSwedI', '7pVn1DfkgCE', '0kbnzmyf6ME'],
+    'paper': ['p7tR5uIqX6o', 'Yss3-upCVWM', 'z67q-hbfoUQ'],
+    'aluminum can': ['bM6g9_lgxNk', 'gJIChIs4g6A', 'mfoFLx67tWk']
+}
+
 @app.route('/')
 def home():
-    return render_template('home.html')
+    return render_template('index.html')
+
+@app.route('/camera')
+def camera():
+    return render_template('camera.html')
 
 @app.route('/scan')
 def scan():
@@ -26,6 +46,7 @@ def analyze_image():
     try:
         genai.configure(api_key=GOOGLE_API_KEY)
 
+        # Image model setup
         image_model = genai.GenerativeModel(
             model_name="gemini-1.0-pro-vision-latest",
             generation_config={
@@ -44,7 +65,7 @@ def analyze_image():
             Objects: List all identifiable objects (e.g., plastic bottle, cardboard box, apple core).
             Materials: Describe the materials of objects when possible (e.g., glass, metal, paper, steel, aluminum).
             Context: Mention any relevant context clues (e.g., objects on a kitchen counter, items in a garbage bin).
-            State and Condition: Note the state of objects (e.g., whole, broken, clean, dirty). 
+            State and Condition: Note the state of objects (e.g., whole, broken, clean, dirty).
             """,
             image_parts[0],
             "\n"
@@ -53,6 +74,7 @@ def analyze_image():
         image_response = image_model.generate_content(image_prompt_parts)
         image_analysis_result = image_response.text
 
+        # Text model for further analysis
         text_model = genai.GenerativeModel(
             model_name="gemini-1.0-pro",
             generation_config={
@@ -64,36 +86,27 @@ def analyze_image():
             safety_settings=[{"category": "HARM_CATEGORY_HARASSMENT", "threshold": "BLOCK_MEDIUM_AND_ABOVE"}]
         )
 
-        text_prompt = f"""Based on the image analysis, determine the recyclability of the objects based on the meterials and the items: {image_analysis_result}"""
+        text_prompt = f"Based on the image analysis, determine the recyclability of the objects and make the response as useful as possible in terms of sustaiability, ensuring the response stays below 300 characters: {image_analysis_result}"
         text_response = text_model.generate_content([text_prompt])
         text_analysis_result = text_response.text
 
-         # Extract materials and map to video IDs
+        # Check for keywords and assign videos and map locations
         recommended_videos = []
-        for material, ids in project_videos.items():
+        map_locations = []
+        for material, info in material_videos.items():
             if material in text_analysis_result.lower():
-                recommended_videos.extend(ids)
+                recommended_videos.extend(info)
+        for material, locations in material_locations.items():
+            if material in text_analysis_result.lower():
+                map_locations.extend(locations)
 
-        return jsonify({'result': text_analysis_result, 'videoIDs': recommended_videos})
+        return jsonify({
+            'result': text_analysis_result,
+            'videoIDs': recommended_videos,
+            'locations': map_locations
+        })
     except Exception as e:
         return jsonify({'error': str(e)})
 
-# A dictionary mapping materials to YouTube video IDs
-project_videos = {
-    'plastic bottle': ['Tzi_uTNT9_E', '8mVpl34OOHA', '0bl-pfdYaEk','rsnNciAnY9Y'],
-    'plastic bag': ['j-7grMXIXs0','qTrsFgGBwcs','zz4P39WeTV8'],
-    'container': ['KYj1f3c_re4', 'xwgX888Kn1Q', 'YoaCQ7CtCA0', 'W4_zew8yNug'],
-    'tupperware': ['wGNi5Y3JX2Q', 'W4_zew8yNug', '0UMmG_sYKsI', 'OV6RUa5ceSU'],
-    'pens': ['sY2sX96nORI', 'X9Fx9fxhNJQ', 'FEd0C_m6i7E', 'S8t9sHXBf_8'],
-    'shirt': ['5KzN8oLMjBI', 'cTQ0_rLrhMc', 'I2CrkTE8NSI', 'bN7J4fJCxqM'],
-    'cloth': ['SNMHT7kTuI8', '1xVcdOYn2ac', 'LTB-jWWbBGc', '6hPQp4RzyMQ'],
-    'paper': ['p7tR5uIqX6o', 'Yss3-upCVWM', 'z67q-hbfoUQ', 'b9qUu4NAgkY'],
-    'fabric': ['87q81l-n5uU', '1xVcdOYn2ac', 'jZQDeOEDnms', 'LclnmAmtGEI'],
-    'glass': ['8f2l2rSwedI', '7pVn1DfkgCE', '0kbnzmyf6ME', 'I8YbZIFLJZk'],
-    'steel': ['nV4pmosgq2w', 'ozrYIv_z6gI', 'NE72xupoUps'],
-    'aluminum': ['bM6g9_lgxNk', 'gJIChIs4g6A', 'mfoFLx67tWk', 'BMg37tRZauI']
-}
-
 if __name__ == "__main__":
     app.run(debug=True)
-
