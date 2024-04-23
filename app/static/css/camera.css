@@ -1,0 +1,105 @@
+/* CSS keyframes and animations for UI elements */
+@keyframes breathe {
+  0%, 100% {
+      transform: scale(1);
+      opacity: 1;
+  }
+  50% {
+      transform: scale(0.95);
+      opacity: 0.7;
+  }
+}
+
+@keyframes sweep {
+  0% {
+      transform: rotate(0deg);
+  }
+  100% {
+      transform: rotate(360deg);
+  }
+}
+
+#photoButton {
+  background-color: rgba(255, 255, 255, 0.2);
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  animation: breathe 2s ease-in-out infinite;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  border: 2px solid white;
+  outline: none;
+}
+
+#photoButton:before {
+  content: '';
+  position: absolute;
+  width: 80%;
+  height: 80%;
+  background-color: white;
+  border-radius: 50%;
+  opacity: 0.5;
+}
+
+#uploadButton {
+  display: none;
+}
+
+#loadingAnimation {
+  display: none;
+  position: absolute;
+  top: 40%;
+  left: 40%;
+  transform: translate(-50%, -50%);
+  width: 100px;
+  height: 100px;
+  background-color: transparent;
+  border-radius: 50%;
+  border: 10px solid transparent;
+  border-top-color: rgba(255, 255, 255, 0.8);
+  animation: sweep 2s linear infinite;
+}
+
+#loadingAnimation:before, #loadingAnimation:after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+}
+
+#loadingAnimation:before {
+  background-color: rgba(0, 255, 0, 0.1);
+  z-index: -1;
+}
+
+#loadingAnimation:after {
+  background-color: rgba(0, 255, 0, 0.05);
+  z-index: -1;
+  animation: pulse 2s ease-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+      transform: scale(0.95);
+      opacity: 0.5;
+  }
+  50% {
+      transform: scale(1.05);
+      opacity: 1;
+  }
+}
+
+#staticImage {
+  display: none;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}

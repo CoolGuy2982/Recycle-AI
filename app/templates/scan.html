@@ -98,6 +98,7 @@
     </div>
 </div>
 <script>
+const googleMapsApiKey = "{{ google_maps_api_key }}";
 window.onload = function() {
     const data = JSON.parse(sessionStorage.getItem('AIResponse'));
     const analysisResult = document.getElementById('analysis-result');
@@ -126,7 +127,7 @@ function displayMap(addresses) {
         mapFrame.style.border = 'none';
         mapFrame.loading = 'lazy';
         mapFrame.allowFullscreen = true;
-        mapFrame.src = `https://www.google.com/maps/embed/v1/place?key=AIzaSyDruxxPPJiOskvUtaVrs8snyzDirMSlu6k&q=${encodeURIComponent(address)}`;
+        mapFrame.src = `https://www.google.com/maps/embed/v1/place?key=${googleMapsApiKey}&q=${encodeURIComponent(address)}`;
         mapContainer.appendChild(mapFrame);
     });
 }

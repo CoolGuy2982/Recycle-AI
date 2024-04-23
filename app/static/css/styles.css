@@ -1,0 +1,18 @@
+.bg-green-950 {
+  /* Define your custom green color here */
+  background-color: #004d40;
+}
+.text-green-500 {
+  /* Define the text color here if it's not part of your Tailwind config */
+  color: #81c784;
+}
+/* Ensure full height for the page and center content */
+html, body {
+  height: 100%;
+  margin: 0;
+}
+body {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
