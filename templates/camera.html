@@ -117,12 +117,11 @@
 <body class="bg-green-600">
     <div class="flex flex-col h-screen">
         <div class="p-6 bg-green-800 flex justify-between items-center">
-            <i class="fas fa-sync text-white text-2xl" onclick="switchCamera()"></i>
-            <i class="fas fa-bolt text-white text-2xl" onclick="toggleFlash()" style="position: absolute; right: 20px;"></i>
             <label for="uploadButton">
                 <i class="fas fa-images text-white text-2xl cursor-pointer"></i>
             </label>
             <input id="uploadButton" type="file" accept="image/*" onchange="handleImageUpload(event)" />
+            <i class="fas fa-bolt text-white text-2xl" style="position: absolute; right: 20px;" onclick="toggleFlash()"></i>
         </div>
         <div class="flex-grow bg-green-200 flex justify-center items-center relative">
             <video id="video" class="absolute top-0 left-0 w-full h-full object-cover" autoplay></video>
@@ -132,6 +131,7 @@
         <div class="p-6 bg-green-800 flex justify-center items-center">
             <button id="photoButton" class="overflow-hidden"></button>
             <canvas id="canvas" class="hidden"></canvas>
+            <i class="fas fa-sync text-white text-2xl" style="position: absolute; right: 20px;" onclick="switchCamera()"></i>
         </div>
     </div>
     <script>
