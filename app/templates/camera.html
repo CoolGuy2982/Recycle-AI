@@ -6,9 +6,10 @@
     <title>Camera App</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&display=swap" rel="stylesheet">
     <link href="{{ url_for('static', filename='css/camera.css') }}" rel="stylesheet">
 </head>
-<body class="bg-green-600">
+<body class="bg-green-600 font-montserrat">
     <div class="flex flex-col h-screen">
         <div class="p-6 bg-green-800 flex justify-between items-center">
             <label for="uploadButton">
@@ -19,8 +20,8 @@
         </div>
         <div class="flex-grow bg-green-200 flex justify-center items-center relative">
             <video id="video" class="absolute top-0 left-0 w-full h-full object-cover" autoplay></video>
-            <img id="staticImage" src="" class="absolute top-0 left-0 w-full h-full object-cover">
-            <div id="loadingAnimation"></div>
+            <img id="staticImage" src="" class="absolute top-0 left-0 w-full h-full object-cover" style="display: none;">
+            <div id="loadingAnimation" style="display: none;"></div>
         </div>
         <div class="p-6 bg-green-800 flex justify-center items-center">
             <button id="photoButton" class="overflow-hidden"></button>
@@ -28,6 +29,14 @@
             <i class="fas fa-sync text-white text-2xl" style="position: absolute; right: 20px;" onclick="switchCamera()"></i>
         </div>
     </div>
+
+    <div id="popup" class="popup">
+        <div class="close-button" onclick="closePopup()">×</div>
+        <div class="popup-text">
+            Scan your recyclable items, turn your trash into magic
+        </div>
+    </div>
+
     <script src="{{ url_for('static', filename='js/camera.js') }}"></script>
 </body>
 </html>

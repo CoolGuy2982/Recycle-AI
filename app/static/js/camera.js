@@ -102,3 +102,16 @@
                 stream.getTracks().forEach(track => track.stop()); // Stop the video stream
             }
         }
+
+        function closePopup() {
+            const popup = document.getElementById('popup');
+            popup.style.display = 'none';
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            const popup = document.getElementById('popup');
+            if (!localStorage.getItem('popupShown')) {
+                popup.style.display = 'block';
+                localStorage.setItem('popupShown', 'true');
+            }
+        });
