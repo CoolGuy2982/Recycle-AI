@@ -1,4 +1,3 @@
-```markdown
 # Recycle-AI
 
 Recycle-AI is a web application designed to assist users in identifying recyclable objects and providing information on how to recycle them properly. Utilizing a camera interface, users can capture images of waste items, which are then analyzed using AI to determine their recyclability.
@@ -11,9 +10,9 @@ Recycle-AI is a web application designed to assist users in identifying recyclab
 - **Educational Resources**: Offers DIY videos and guides on recycling processes.
 
 ## Setup
-
 To run this project, you will need to install the following dependencies:
 
+```markdown
 ```bash
 pip install -r requirements.txt
 ```
