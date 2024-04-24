@@ -13,15 +13,13 @@ Recycle-AI is a web application designed to assist users in identifying recyclab
 To run this project, you will need to install the following dependencies:
 
 ```markdown
-```bash
 pip install -r requirements.txt
 ```
 
 Make sure to set your environment variables in the `.env` file:
 
 ```env
-FLASK_APP=app.py
-FLASK_ENV=development
+GOOGLE_API_KEY= your gemini key here
 GOOGLE_MAPS_API_KEY=your_google_maps_api_key
 ```
 
@@ -37,7 +35,7 @@ source .venv/bin/activate
 Run the application:
 
 ```bash
-flask run
+run app.py
 ```
 
 ## Project Structure
