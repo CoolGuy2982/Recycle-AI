@@ -2,9 +2,9 @@ import base64
 from dotenv import load_dotenv
 import os
 import google.generativeai as genai
-
+#from flask_cors import CORS
 # Load environment variables
-load_dotenv()
+
 GOOGLE_API_KEY = os.getenv('GOOGLE_API_KEY')
 
 # Separate dictionaries for locations and videos
