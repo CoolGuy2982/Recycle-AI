@@ -1,4 +1,3 @@
-```markdown
 # Recycle-AI
 
 Recycle-AI is a web application designed to assist users in identifying recyclable objects and providing information on how to recycle them properly. Utilizing a camera interface, users can capture images of waste items, which are then analyzed using AI to determine their recyclability.
@@ -11,18 +10,16 @@ Recycle-AI is a web application designed to assist users in identifying recyclab
 - **Educational Resources**: Offers DIY videos and guides on recycling processes.
 
 ## Setup
-
 To run this project, you will need to install the following dependencies:
 
-```bash
+```markdown
 pip install -r requirements.txt
 ```
 
 Make sure to set your environment variables in the `.env` file:
 
 ```env
-FLASK_APP=app.py
-FLASK_ENV=development
+GOOGLE_API_KEY= your gemini key here
 GOOGLE_MAPS_API_KEY=your_google_maps_api_key
 ```
 
@@ -38,7 +35,7 @@ source .venv/bin/activate
 Run the application:
 
 ```bash
-flask run
+run app.py
 ```
 
 ## Project Structure
@@ -82,4 +79,3 @@ Contributions to Recycle-AI are welcome! Please read `CONTRIBUTING.md` for detai
 ## License
 
 This project is licensed under the MIT License - see the License file for details.
-```
