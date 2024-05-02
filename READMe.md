@@ -72,10 +72,6 @@ RECYCLE-AI/
 
 Navigate to the home page and use the camera interface to take a picture of the item you want to recycle. The AI will analyze the image and provide information on the recyclability of the item, educational resources, and a map showing nearby recycling centers.
 
-## Contributing
-
-Contributions to Recycle-AI are welcome! Please read `CONTRIBUTING.md` for details on our code of conduct, and the process for submitting pull requests to us.
-
 ## License
 
 This project is licensed under the MIT License - see the License file for details.
