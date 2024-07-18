@@ -9,10 +9,10 @@ GOOGLE_API_KEY = os.getenv('GOOGLE_API_KEY')
 
 # Separate dictionaries for locations and videos
 material_locations = {
-    'plastic': ['Boyd E. Diller Transfer Station Drop-Off Recycling, 6820 Wertzville Road, Enola, PA 17025'],
-    'glass': ['New Hope Recycling, 415 Three Square Hollow Road, Newburg, PA 17240'],
-    'paper': ['Waste Management of Central Pennsylvania Transfer Station Drop-Off Recycling, 4300 Industrial Park Road, Camp Hill, PA 17011'],
-    'metal': ['Cumberland County Landfill Drop-Off Recycling, 620 Newville Road, Newburg, PA 17240'],
+    'plastic': [#insert ur locations here],
+    'glass': [#insert ur locations here],
+    'paper': [#insert ur locations here],
+    'metal': [#insert ur locations here],
 }
 
 material_videos = {
