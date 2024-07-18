@@ -2,8 +2,8 @@
 
 Recycle-AI is a web application designed to assist users in identifying recyclable objects and providing information on how to recycle them properly. Utilizing a camera interface, users can capture images of waste items, which are then analyzed using AI to determine their recyclability.
 
-If you are interested in this project and want to hear more from Firley, please fill out this interest form, we'd appreciate it a lot! 
- - https://www.firley.org/interest
+If you are interested in this project and want to hear more from Firley, please email me:
+firleycompany@gmail.com
 
 ## Features
 
